@@ -1,0 +1,9 @@
+kill server
+vncserver -kill :1
+kill user
+pkill -KILL -u yourusername
+restart
+chmod +x ~/.vnc/xstartup
+vncserver -localhost
+on client 
+ssh -L 59000:localhost:5901 -C -N -l username server_ip
