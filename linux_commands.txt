@@ -1,0 +1,8 @@
+swap 
+sudo swapon --show
+check what swap is free
+free -h
+sudo fallocate -l 1G /swapfile
+for root access
+sudo chmod 600 /swapfile
+sudo swapon /swapfile
