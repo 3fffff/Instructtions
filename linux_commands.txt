@@ -6,3 +6,7 @@ sudo fallocate -l 1G /swapfile
 for root access
 sudo chmod 600 /swapfile
 sudo swapon /swapfile
+//access resource
+sudo chmod a+rwx -R /dev/bus/usb/005/009
+//load kernel module
+insmod
