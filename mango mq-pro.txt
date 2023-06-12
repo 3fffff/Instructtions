@@ -1,0 +1,106 @@
+mkdir yocto
+cd yocto/
+
+
+git clone git://git.yoctoproject.org/poky.git
+cd poky/
+
+
+git clone https://github.com/riscv/meta-riscv.git
+git clone git://git.openembedded.org/meta-openembedded
+
+
+cd ..
+mkdir mangopi_mqpro
+cd mangopi_mqpro/
+
+//init base config
+source ../poky/oe-init-build-env ./
+
+//conf/bblayers.conf
+
+
+
+# POKY_BBLAYERS_CONF_VERSION is increased each time build/conf/bblayers.conf
+# changes incompatibly
+POKY_BBLAYERS_CONF_VERSION = "2"
+
+BBPATH = "${TOPDIR}"
+BBFILES ?= ""
+
+BBLAYERS ?= " \
+  ${HOME}/yocto/poky/meta \
+  ${HOME}/yocto/poky/meta-poky \
+  ${HOME}/yocto/poky/meta-yocto-bsp \
+  ${HOME}/yocto/poky/meta-riscv \
+  ${HOME}/yocto/poky/meta-openembedded/meta-oe \
+  ${HOME}/yocto/poky/meta-openembedded/meta-networking \
+  ${HOME}/yocto/poky/meta-openembedded/meta-python \
+  
+  //vi conf/local.conf
+  
+  MACHINE ??= "mangopi-mq-pro"
+IMAGE_INSTALL:append = " wpa-supplicant linux-firmware rtl8723ds libgpiod libgpiod-tools libgpiod-dev dhcpcd chrony python3 python3-pip vim htop stress-ng tzdata openssh"
+bitbake core-image-full-cmdline
+
+sudo bmaptool copy tmp/deploy/images/mangopi-mq-pro/core-image-full-cmdline-mangopi-mq-pro.wic.gz /dev/sdc
+
+
+
+vi /etc/network/interfaces
+
+
+
+# Wireless interfaces
+auto wlan0
+iface wlan0 inet dhcp
+        wireless_mode managed
+        wireless_essid any
+        #wpa-driver wext
+        wpa-driver nl80211
+        wpa-conf /etc/wpa_supplicant.conf
+        
+vi /etc/wpa_supplicant.conf
+
+
+
+ctrl_interface=/var/run/wpa_supplicant
+ctrl_interface_group=0
+update_config=1
+
+network={
+        ssid="YOUR_SSID"
+        psk="YOUR_PASS"
+        #key_mgmt=NONE
+}
+
+
+python3 -m pip install -U --user pip gpiod
+
+
+
+python3 -m gpiod.test.blink 0 114
+
+
+
+# GPIO used PD18
+
+import gpiod
+import time
+
+chip = gpiod.chip(0)
+led = chip.get_line(114)
+
+config = gpiod.line_request()
+config.consumer = "Blink"
+config.request_type = gpiod.line_request.DIRECTION_OUTPUT
+
+led.request(config)
+
+print(led.consumer)
+
+while True:
+    led.set_value(0)
+    time.sleep(1)
+    led.set_value(1)
+    time.sleep(1)
