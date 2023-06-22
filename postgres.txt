@@ -1,0 +1,18 @@
+su - postgres
+
+Create User for Postgres (in the shell and NOT with psql)
+
+$ createuser testuser
+
+Create Database (same)
+
+$ createdb testdb
+
+Acces the postgres Shell
+
+psql ( enter the password for postgressql)
+
+Provide the privileges to the postgres user
+
+$ alter user testuser with encrypted password 'qwerty';
+$ grant all privileges on database testdb to testuser;
