@@ -1,0 +1,33 @@
+
+
+I'd suggest using devtool modify linux-at91 to modify the linux kernel source-tree. This will create a linux-at91 folder in your ${TOPDIR}/workspace/sources/linux-at91. If you don't know your ${TOPDIR}, try to use bitbake -e <recipe-name> | grep "TOPDIR". bitbake -e will print your entire metadata for that recipe, here you can use grep to find the assignments of different variables. (like your KERNEL_DEVICETREE)
+
+    ${TOPDIR}/workspace/sources/linux-at91
+
+This will be the source tree for your linux-at91 recipe.
+
+Copy your dts files into ${TOPDIR}/workspace/sources/linux-at91/arch/arm/boot/dts.
+
+Modify the Makefile to include your dts, as pointed out by @BelHadjSalem TALEL (Thanks!).
+
+Commit these changes and generate a patch.
+
+In your own layer, under recipes-kernel/linux-at91/linux-at91 place this patch file. Add recipes-kernel/linux-at91/linux-at91.bbappend to include this patch as below:
+
+FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
+SRC_URI += "file://0001-add-dts-file.patch"
+
+Now to build your custom-machine, add conf/machine/custom-machine.conf and add an entry for your custom KERNEL_DEVICETREE like shown here
+
+# This will inherit your base machine
+require conf/machine/sama5d27-wlsom1-ek-sd.conf
+
+KERNEL_DEVICETREE = "your-dts-file.dtb"
+
+Overall, your layer will have following files:
+
+- conf/layer.conf
+- conf/machine/custom-machine.conf (Contains the above settings)
+- recipes-kernel/linux-at91/linux-at91/0001-add-dts-file.patch
+- recipes-kernel/linux-at91/linux-at91/linux-at91.bbappend
+
