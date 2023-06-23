@@ -1,0 +1,46 @@
+<script>
+    const nullPromise = Promise.resolve(null);
+
+    const cPromise = Promise.resolve({
+        id: 'cc', // идентификатор кванта
+        priority: 5, // приоритет переноса - сначала переносим кванты с наибольшим приоритетом
+        transfer: () => nullPromise, // асинхронная функция, которая перемещает квант и возвращает список квантов, на которые разделился исходный, либо null
+    });
+
+    const dPromise = Promise.resolve({
+        id: 'dd', // идентификатор кванта
+        priority: 3, // приоритет переноса - сначала переносим кванты с наибольшим приоритетом
+        transfer: () => nullPromise, // асинхронная функция, которая перемещает квант и возвращает список квантов, на которые разделился исходный, либо null
+    });
+
+    const q = [
+        {
+            id: 'aa', // идентификатор кванта
+            priority: 2, // приоритет переноса - сначала переносим кванты с наибольшим приоритетом
+            transfer: () => nullPromise, // асинхронная функция, которая перемещает квант и возвращает список квантов, на которые разделился исходный, либо null
+        },
+        {
+            id: 'bb', // идентификатор кванта
+            priority: 3, // приоритет переноса - сначала переносим кванты с наибольшим приоритетом
+            transfer: () => [dPromise, cPromise], // асинхронная функция, которая перемещает квант и возвращает список квантов, на которые разделился исходный, либо null
+        },
+    ];
+
+    function quantumClosure(quantums, len) {
+        function transport(quants) {
+            const quantsSort = quants.sort((a, b) => (b.priority - a.priority)).slice(0, len)
+            const restQuants = quants.slice(len)
+            if (quantsSort.length == 0) return
+            for (let i = 0; i < quantsSort.length; i++)console.log(quantsSort[i].id)
+            return Promise.all(quantsSort.map(qTrans => {
+                return qTrans.transfer()
+            }).flat()).then(quantMoved => {
+                const quantFiltered = quantMoved.filter(x => !!x)
+                const quantsToMove = [...quantFiltered, ...restQuants]
+                return transport(quantsToMove)
+            })
+        }
+        return transport(quantums)
+    }
+    quantumClosure(q, 4)
+</script>
