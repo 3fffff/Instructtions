@@ -1,0 +1,5 @@
+One new feature in the 2.6.13-rc3 kernel release, 
+is the ability to bind and unbind drivers from devices manually from user space. 
+Previously, the only way to disconnect a driver from a device was usually to unload the whole driver from memory, using rmmod.
+/sys/bus/usb/drivers/ch341
+echo "5-1.1:1.0" > unbind
